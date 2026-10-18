@@ -6,6 +6,7 @@ from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import time
 import logging
+import os
 from app.config import settings
 from app.database import async_session
 from app.models import Master, Client
@@ -89,10 +90,21 @@ async def start_handler(message: types.Message, state: FSMContext):
         master = await session.scalar(stmt)
 
         if master:
+            # Registered master - show menu
+            keyboard = ReplyKeyboardMarkup(
+                keyboard=[
+                    [KeyboardButton(text="🔗 Моя ссылка")],
+                    [KeyboardButton(text="📋 Услуги")],
+                    [KeyboardButton(text="⏰ График работы")],
+                    [KeyboardButton(text="📅 Мои записи")],
+                ],
+                resize_keyboard=True
+            )
             await message.answer(
                 f"👋 Привет, {master.first_name}!\n\n"
-                f"Добро пожаловать в сервис онлайн-записи.",
-                reply_markup=get_master_menu(),
+                f"Добро пожаловать в сервис онлайн-записи!\n\n"
+                f"Ссылка для клиентов: http://localhost:8000/book/{master.registration_link_slug}",
+                reply_markup=keyboard,
             )
         else:
             await message.answer(
@@ -168,7 +180,7 @@ async def process_timezone(message: types.Message, state: FSMContext):
         await message.answer(
             f"✅ Регистрация завершена!\n\n"
             f"Твоя личная ссылка для клиентов:\n"
-            f"https://yourapp.com/book/{slug}\n\n"
+            f"`{os.getenv('APP_DOMAIN', 'https://yourapp.com')}/book/{slug}`\n\n"
             f"Теперь давай настроим твои услуги и график работы.",
             reply_markup=get_master_menu(),
         )
@@ -187,9 +199,14 @@ async def show_link(message: types.Message):
             await message.answer("Ты ещё не зарегистрирован. Напиши /start")
             return
 
+        # Get actual domain from environment or use default
+        import os
+        domain = os.getenv('APP_DOMAIN', 'https://yourapp.com')
+        booking_url = f"{domain}/book/{master.registration_link_slug}"
+
         await message.answer(
             f"🔗 Твоя ссылка для клиентов:\n\n"
-            f"`https://yourapp.com/book/{master.registration_link_slug}`\n\n"
+            f"`{booking_url}`\n\n"
             f"Отправь её своим клиентам!",
             parse_mode="Markdown",
         )
@@ -285,3 +302,14 @@ async def start_bot():
 async def stop_bot():
     """Stop bot"""
     await bot.session.close()
+
+
+async def main():
+    """Main entry point for bot"""
+    logger.info("Starting Telegram bot...")
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

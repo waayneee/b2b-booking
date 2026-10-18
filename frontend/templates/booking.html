@@ -2,94 +2,520 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Забронировать время</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Запись к мастеру</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+            background: #f5f5f5;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 16px;
+            padding-top: max(16px, env(safe-area-inset-top));
+        }
+
+        .profile {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .profile h1 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .profile p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .services {
+            margin-bottom: 20px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .service-card:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .service-card h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .service-card .details {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .price {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .duration {
+            color: #999;
+        }
+
+        .calendar {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .slots {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .slot {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .slot:active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .slot.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .slot.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .confirmation {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .confirmation h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .confirmation-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .confirmation-detail strong {
+            color: #333;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:active {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:active {
+            background: #eee;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .error {
+            background: #fee;
+            border: 1px solid #f99;
+            color: #c00;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #efe;
+            border: 1px solid #9f9;
+            color: #060;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+            }
+
+            .slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="header-title" id="masterName">Мастер</div>
-            <div class="header-subtitle" id="masterSpecialization">Специалист</div>
-        </div>
+        <div id="message"></div>
 
-        <!-- Главная страница -->
-        <div id="masterCard" class="card">
-            <div id="masterDescription" class="card-description"></div>
-            <div style="margin-top: var(--spacing-lg); color: var(--gray-500); font-size: 14px;">
-                ⏰ <span id="masterSchedule"></span>
+        <!-- Step 1: Services -->
+        <div id="step-services" class="step active">
+            <div class="profile">
+                <h1 id="masterName">Загрузка...</h1>
+                <p id="masterSpec">-</p>
+                <p id="masterDesc" style="margin-top: 12px; font-size: 13px;">-</p>
+            </div>
+
+            <div class="services">
+                <h3 style="color: #333; margin-bottom: 12px; padding: 0 16px;">Услуги</h3>
+                <div id="servicesList"></div>
             </div>
         </div>
 
-        <!-- Выбор услуги -->
-        <div id="serviceSelection">
-            <div style="margin-bottom: var(--spacing-md); font-weight: 600; color: var(--gray-700);">
-                Выбери услугу:
+        <!-- Step 2: Date & Time -->
+        <div id="step-datetime" class="step">
+            <div class="calendar">
+                <h3>Выберите дату</h3>
+                <input type="date" id="dateInput" class="date-input">
             </div>
-            <div id="servicesList" class="grid gap-md"></div>
-        </div>
 
-        <!-- Выбор даты -->
-        <div id="dateSelection" style="display: none;">
-            <div class="card">
-                <div class="card-title">Выбери дату</div>
-                <input type="date" id="targetDate" class="form-control" style="margin-bottom: var(--spacing-md);">
-                <button class="btn btn-secondary btn-block" onclick="app.previousMonth()">← Пред. месяц</button>
-                <button class="btn btn-secondary btn-block" style="margin-top: var(--spacing-sm);" onclick="app.nextMonth()">След. месяц →</button>
+            <div class="calendar">
+                <h3>Выберите время</h3>
+                <div id="slotsList" class="slots"></div>
             </div>
         </div>
 
-        <!-- Выбор времени -->
-        <div id="timeSelection" style="display: none;">
-            <div class="card">
-                <div class="card-title">Доступное время</div>
-                <div id="timeSlots" class="time-slots"></div>
-                <button class="btn btn-secondary btn-block mt-md" onclick="app.backToDateSelection()">← Назад к дате</button>
-            </div>
-        </div>
-
-        <!-- Подтверждение -->
-        <div id="confirmation" style="display: none;">
-            <div class="card">
-                <div class="card-title">Подтверди запись</div>
-                <div style="margin-bottom: var(--spacing-lg);">
-                    <div style="margin-bottom: var(--spacing-md);">
-                        <div class="text-xs text-muted">Услуга</div>
-                        <div class="font-bold" id="confirmServiceName"></div>
-                        <div class="text-sm text-muted" id="confirmServiceDetails"></div>
-                    </div>
-                    <div style="margin-bottom: var(--spacing-md);">
-                        <div class="text-xs text-muted">Дата и время</div>
-                        <div class="font-bold" id="confirmDateTime"></div>
-                    </div>
-                    <div>
-                        <label for="clientPhone">Твой номер телефона (опционально)</label>
-                        <input type="tel" id="clientPhone" placeholder="+7 (___) ___-__-__">
-                    </div>
+        <!-- Step 3: Confirmation -->
+        <div id="step-confirmation" class="step">
+            <div class="confirmation">
+                <h3>Ваша запись</h3>
+                <div class="confirmation-detail">
+                    <span>Услуга:</span>
+                    <strong id="confirmService">-</strong>
                 </div>
-                <button class="btn btn-primary btn-block" onclick="app.submitBooking()">✓ Подтвердить запись</button>
-                <button class="btn btn-secondary btn-block mt-sm" onclick="app.backToTimeSelection()">← Назад</button>
-            </div>
-        </div>
-
-        <!-- Успех -->
-        <div id="successMessage" style="display: none;">
-            <div class="card">
-                <div style="text-align: center; padding: var(--spacing-xl) 0;">
-                    <div style="font-size: 48px; margin-bottom: var(--spacing-md);">✅</div>
-                    <div class="card-title">Запись успешно создана!</div>
-                    <div class="text-muted" style="margin-bottom: var(--spacing-lg);">
-                        Проверь уведомления в Telegram
-                    </div>
-                    <button class="btn btn-primary btn-block" onclick="app.reset()">← Вернуться</button>
+                <div class="confirmation-detail">
+                    <span>Дата и время:</span>
+                    <strong id="confirmDateTime">-</strong>
+                </div>
+                <div class="confirmation-detail">
+                    <span>Мастер:</span>
+                    <strong id="confirmMaster">-</strong>
                 </div>
             </div>
+
+            <input type="tel" id="phoneInput" class="input-field" placeholder="Ваш номер телефона" />
+            <input type="text" id="nameInput" class="input-field" placeholder="Ваше имя" />
         </div>
 
-        <!-- Ошибка -->
-        <div id="errorMessage" style="display: none;" class="alert alert-danger"></div>
+        <!-- Step 4: Success -->
+        <div id="step-success" class="step">
+            <div style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
+                <h2 style="color: #333; margin-bottom: 12px;">Запись подтверждена!</h2>
+                <p style="color: #666; margin-bottom: 20px;">Вы получите уведомление в Telegram</p>
+                <button class="btn btn-primary" onclick="location.reload()">Назад к услугам</button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div id="nav-buttons" style="margin-bottom: 20px;">
+            <button id="prevBtn" class="btn btn-secondary" onclick="previousStep()" style="display: none;">← Назад</button>
+            <button id="nextBtn" class="btn btn-primary" onclick="nextStep()">Выбрать время →</button>
+        </div>
     </div>
 
-    <script src="/static/js/app.js"></script>
+    <script>
+        const API_URL = '/api';
+        let currentStep = 1;
+        let masterSlug = null;
+        let masterData = null;
+        let selectedService = null;
+        let selectedDate = null;
+        let selectedTime = null;
+
+        // Extract slug from URL
+        function init() {
+            masterSlug = window.location.pathname.split('/book/')[1];
+            if (!masterSlug) {
+                showError('Master not found');
+                return;
+            }
+
+            loadMasterProfile();
+        }
+
+        function showMessage(text, type = 'success') {
+            const el = document.getElementById('message');
+            el.innerHTML = `<div class="${type}">${text}</div>`;
+            setTimeout(() => {
+                el.innerHTML = '';
+            }, 5000);
+        }
+
+        function showError(text) {
+            showMessage('❌ ' + text, 'error');
+        }
+
+        async function loadMasterProfile() {
+            try {
+                const response = await fetch(`${API_URL}/masters/${masterSlug}`);
+                if (!response.ok) throw new Error('Master not found');
+                masterData = await response.json();
+
+                document.getElementById('masterName').textContent = masterData.first_name + (masterData.last_name ? ' ' + masterData.last_name : '');
+                document.getElementById('masterSpec').textContent = masterData.specialization || 'Мастер';
+                document.getElementById('masterDesc').textContent = masterData.description || '';
+                document.getElementById('confirmMaster').textContent = masterData.first_name;
+
+                await loadServices();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function loadServices() {
+            try {
+                const response = await fetch(`${API_URL}/masters/${masterData.id}/services`);
+                const services = await response.json();
+
+                const html = services.map(s => `
+                    <div class="service-card" onclick="selectService(${s.id}, '${s.name}', ${s.price}, ${s.duration_minutes})">
+                        <h3>${s.name}</h3>
+                        <div class="details">
+                            <span class="price">${s.price} ₽</span>
+                            <span class="duration">${s.duration_minutes} мин</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('servicesList').innerHTML = html;
+            } catch (error) {
+                showError('Failed to load services');
+            }
+        }
+
+        function selectService(id, name, price, duration) {
+            selectedService = { id, name, price, duration };
+            document.getElementById('confirmService').textContent = name;
+            showMessage('✅ Услуга выбрана: ' + name);
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
+            document.getElementById('dateInput').min = today;
+
+            loadSlots();
+            goToStep(2);
+        }
+
+        async function loadSlots() {
+            try {
+                const date = document.getElementById('dateInput').value;
+                if (!date) return;
+
+                const response = await fetch(`${API_URL}/available-slots/${masterSlug}?service_id=${selectedService.id}&target_date=${date}`);
+                const data = await response.json();
+
+                if (!data.slots || data.slots.length === 0) {
+                    document.getElementById('slotsList').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">Нет свободного времени</p>';
+                    return;
+                }
+
+                const html = data.slots.map(slot => {
+                    const time = new Date(slot.start_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                    return `<div class="slot" onclick="selectTime('${slot.start_time}')">${time}</div>`;
+                }).join('');
+
+                document.getElementById('slotsList').innerHTML = html;
+            } catch (error) {
+                showError('Failed to load slots');
+            }
+        }
+
+        function selectTime(isoTime) {
+            selectedTime = isoTime;
+            const date = new Date(isoTime);
+            const dateStr = date.toLocaleDateString('ru-RU');
+            const timeStr = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('confirmDateTime').textContent = dateStr + ' ' + timeStr;
+            goToStep(3);
+        }
+
+        async function bookAppointment() {
+            const phone = document.getElementById('phoneInput').value;
+            const name = document.getElementById('nameInput').value;
+
+            if (!phone || !name) {
+                showError('Please fill all fields');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/bookings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        master_slug: masterSlug,
+                        telegram_id: '0',
+                        service_id: selectedService.id,
+                        start_time: selectedTime,
+                        client_phone: phone,
+                        notes: name
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Booking failed');
+                }
+
+                goToStep(4);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function goToStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step-${['services', 'datetime', 'confirmation', 'success'][step - 1]}`).classList.add('active');
+
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+
+            if (step === 1) {
+                nextBtn.style.display = 'block';
+                nextBtn.innerHTML = 'Выбрать время →';
+                nextBtn.onclick = () => { if (selectedService) goToStep(2); else showError('Select service first'); };
+                prevBtn.style.display = 'none';
+            } else if (step === 2) {
+                nextBtn.innerHTML = 'Подтвердить →';
+                nextBtn.onclick = () => { if (selectedTime) goToStep(3); else showError('Select time first'); };
+                prevBtn.style.display = 'block';
+            } else if (step === 3) {
+                nextBtn.innerHTML = '✅ Забронировать';
+                nextBtn.onclick = bookAppointment;
+                prevBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'none';
+                prevBtn.style.display = 'none';
+            }
+
+            currentStep = step;
+        }
+
+        function nextStep() {
+            goToStep(Math.min(currentStep + 1, 4));
+        }
+
+        function previousStep() {
+            goToStep(Math.max(currentStep - 1, 1));
+        }
+
+        document.getElementById('dateInput').addEventListener('change', loadSlots);
+
+        init();
+    </script>
 </body>
 </html>

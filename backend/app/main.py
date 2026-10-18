@@ -529,6 +529,17 @@ async def booking_page(master_slug: str):
     raise HTTPException(status_code=404, detail="Booking page not found")
 
 
+@app.get("/dashboard")
+async def dashboard_page():
+    """Serve master dashboard"""
+    template_path = os.path.join(
+        os.path.dirname(__file__), '..', '..', 'frontend', 'index.html'
+    )
+    if os.path.exists(template_path):
+        return FileResponse(template_path)
+    raise HTTPException(status_code=404, detail="Dashboard not found")
+
+
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -538,6 +549,18 @@ async def root():
         "docs": "/docs",
         "api_prefix": "/api",
     }
+
+
+# === Webhook for Telegram (optional, for future webhook mode) ===
+@app.post(settings.WEBHOOK_PATH)
+async def telegram_webhook(update: dict, db: AsyncSession = Depends(get_db)):
+    """Receive updates from Telegram via webhook.
+
+    Currently not used - bot uses polling mode.
+    Can be enabled by setting TELEGRAM_WEBHOOK_URL in env.
+    """
+    logger.info(f"Webhook received: {update}")
+    return {"ok": True}
 
 
 if __name__ == "__main__":

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет мастера - Booking Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .card .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .link-section {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .link-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .booking-link {
+            background: white;
+            border: 1px solid #667eea;
+            color: #667eea;
+            padding: 12px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            word-break: break-all;
+        }
+
+        .booking-link:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-copy {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy:hover {
+            background: #764ba2;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+        }
+
+        .error {
+            background: #fee;
+            border: 2px solid #f66;
+            color: #c00;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #efe;
+            border: 2px solid #6f6;
+            color: #060;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav button:hover, .nav button.active {
+            background: #764ba2;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-copy {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Кабинет мастера</h1>
+
+        <div id="message"></div>
+
+        <div class="nav">
+            <button class="tab-btn active" data-tab="dashboard">Главная</button>
+            <button class="tab-btn" data-tab="link">Ссылка для клиентов</button>
+            <button class="tab-btn" data-tab="bookings">Мои записи</button>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section active">
+            <div class="dashboard">
+                <div class="card">
+                    <div class="icon">📋</div>
+                    <h3>Услуги</h3>
+                    <div class="value" id="servicesCount">-</div>
+                </div>
+                <div class="card">
+                    <div class="icon">📅</div>
+                    <h3>Записи</h3>
+                    <div class="value" id="bookingsCount">-</div>
+                </div>
+                <div class="card">
+                    <div class="icon">👥</div>
+                    <h3>Клиенты</h3>
+                    <div class="value" id="clientsCount">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Link Section -->
+        <div id="link" class="section">
+            <div class="link-section">
+                <h3>🔗 Ссылка для клиентов</h3>
+                <p style="color: #666; margin-bottom: 15px;">Отправь эту ссылку своим клиентам для записи:</p>
+                <div id="linkContainer" style="margin: 20px 0;">
+                    <div class="loading">Загрузка...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Section -->
+        <div id="bookings" class="section">
+            <h3 style="color: #333; margin-bottom: 20px;">Мои записи</h3>
+            <div id="bookingsContainer">
+                <div class="loading">Загрузка записей...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let masterId = null;
+        let masterSlug = null;
+        let telegramId = null;
+
+        // Parse query params to get master info
+        function initFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            telegramId = params.get('telegram_id');
+            masterSlug = params.get('slug');
+
+            if (!telegramId) {
+                showMessage('❌ Требуется telegram_id в URL', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        function showMessage(text, type = 'success') {
+            const el = document.getElementById('message');
+            el.innerHTML = `<div class="${type}">${text}</div>`;
+            setTimeout(() => {
+                el.innerHTML = '';
+            }, 3000);
+        }
+
+        async function loadMasterData() {
+            try {
+                const response = await fetch(`${API_URL}/masters/me?telegram_id=${telegramId}`);
+                if (!response.ok) throw new Error('Master not found');
+                const master = await response.json();
+                masterId = master.id;
+                masterSlug = master.registration_link_slug;
+
+                document.querySelector('h1').textContent = `👋 ${master.first_name}`;
+
+                loadDashboard();
+                loadLink();
+            } catch (error) {
+                showMessage('❌ ' + error.message, 'error');
+            }
+        }
+
+        async function loadDashboard() {
+            try {
+                const [servicesRes, bookingsRes] = await Promise.all([
+                    fetch(`${API_URL}/masters/${masterId}/services`),
+                    fetch(`${API_URL}/bookings?telegram_id=${telegramId}&role=master`)
+                ]);
+
+                const services = await servicesRes.json();
+                const bookings = await bookingsRes.json();
+
+                document.getElementById('servicesCount').textContent = services.length || 0;
+                document.getElementById('bookingsCount').textContent = bookings.length || 0;
+                document.getElementById('clientsCount').textContent = '—';
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadLink() {
+            try {
+                const response = await fetch(`${API_URL}/masters/me?telegram_id=${telegramId}`);
+                const master = await response.json();
+
+                const bookingUrl = `${window.location.origin}/book/${master.registration_link_slug}`;
+
+                document.getElementById('linkContainer').innerHTML = `
+                    <div style="background: white; padding: 15px; border: 2px dashed #667eea; border-radius: 6px; word-break: break-all;">
+                        <a href="${bookingUrl}" target="_blank" class="booking-link">${bookingUrl}</a>
+                        <button class="btn-copy" onclick="copyToClipboard('${bookingUrl}')">📋 Копировать</button>
+                    </div>
+                `;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage('✅ Скопировано в буфер обмена', 'success');
+            });
+        }
+
+        async function loadBookings() {
+            try {
+                const response = await fetch(`${API_URL}/bookings?telegram_id=${telegramId}&role=master`);
+                const bookings = await response.json();
+
+                if (!bookings.length) {
+                    document.getElementById('bookingsContainer').innerHTML = '<p style="text-align: center; color: #666;">Записей нет</p>';
+                    return;
+                }
+
+                const html = bookings.map(b => `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                        <p><strong>Дата:</strong> ${new Date(b.start_time).toLocaleString('ru-RU')}</p>
+                        <p><strong>Клиент:</strong> ${b.client_phone || '—'}</p>
+                        <p><strong>Статус:</strong> ${b.status}</p>
+                    </div>
+                `).join('');
+
+                document.getElementById('bookingsContainer').innerHTML = html;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+
+                if (tabName === 'bookings') {
+                    loadBookings();
+                }
+            });
+        });
+
+        // Init on load
+        if (initFromUrl()) {
+            loadMasterData();
+        }
+    </script>
+</body>
+</html>
