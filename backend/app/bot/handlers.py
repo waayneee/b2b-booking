@@ -15,7 +15,12 @@ from sqlalchemy import select
 logger = logging.getLogger(__name__)
 
 # Initialize bot and dispatcher
-bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
+try:
+    bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
+except Exception as e:
+    logger.warning(f"Bot token invalid or not set: {e}. Bot will not work until proper token is configured.")
+    bot = None
+
 dp = Dispatcher()
 
 
