@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     gcc \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip and setuptools to avoid metadata generation issues
+RUN pip install --upgrade pip setuptools wheel
 
 # Install Python dependencies
 COPY requirements.txt .
