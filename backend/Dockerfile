@@ -4,22 +4,21 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
+# Copy requirements first
 COPY requirements.txt .
 
-# Install dependencies with simpler options
-RUN pip install --no-cache-dir --upgrade pip && \
+# Install Python dependencies with pre-built wheels only
+RUN pip install --no-cache-dir --only-binary :all: --upgrade pip setuptools && \
+    pip install --no-cache-dir --only-binary :all: -r requirements.txt || \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy application
 COPY . .
 
-# Expose port
 EXPOSE 8000
 
-# Run migrations and start app
+# Start command
 CMD ["sh", "-c", "cd /app && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
