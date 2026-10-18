@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p migrations/versions)",
+      "Bash(touch migrations/env.py migrations/script.py.mako migrations/versions/__init__.py)",
+      "Bash(python -c \"import sys; print\\(f'Python {sys.version}'\\)\")",
+      "Bash(cat)",
+      "Read(//tmp/**)",
+      "WebFetch(domain:center.yandex.cloud)"
+    ]
+  }
+}

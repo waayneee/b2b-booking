@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Забронировать время</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title" id="masterName">Мастер</div>
+            <div class="header-subtitle" id="masterSpecialization">Специалист</div>
+        </div>
+
+        <!-- Главная страница -->
+        <div id="masterCard" class="card">
+            <div id="masterDescription" class="card-description"></div>
+            <div style="margin-top: var(--spacing-lg); color: var(--gray-500); font-size: 14px;">
+                ⏰ <span id="masterSchedule"></span>
+            </div>
+        </div>
+
+        <!-- Выбор услуги -->
+        <div id="serviceSelection">
+            <div style="margin-bottom: var(--spacing-md); font-weight: 600; color: var(--gray-700);">
+                Выбери услугу:
+            </div>
+            <div id="servicesList" class="grid gap-md"></div>
+        </div>
+
+        <!-- Выбор даты -->
+        <div id="dateSelection" style="display: none;">
+            <div class="card">
+                <div class="card-title">Выбери дату</div>
+                <input type="date" id="targetDate" class="form-control" style="margin-bottom: var(--spacing-md);">
+                <button class="btn btn-secondary btn-block" onclick="app.previousMonth()">← Пред. месяц</button>
+                <button class="btn btn-secondary btn-block" style="margin-top: var(--spacing-sm);" onclick="app.nextMonth()">След. месяц →</button>
+            </div>
+        </div>
+
+        <!-- Выбор времени -->
+        <div id="timeSelection" style="display: none;">
+            <div class="card">
+                <div class="card-title">Доступное время</div>
+                <div id="timeSlots" class="time-slots"></div>
+                <button class="btn btn-secondary btn-block mt-md" onclick="app.backToDateSelection()">← Назад к дате</button>
+            </div>
+        </div>
+
+        <!-- Подтверждение -->
+        <div id="confirmation" style="display: none;">
+            <div class="card">
+                <div class="card-title">Подтверди запись</div>
+                <div style="margin-bottom: var(--spacing-lg);">
+                    <div style="margin-bottom: var(--spacing-md);">
+                        <div class="text-xs text-muted">Услуга</div>
+                        <div class="font-bold" id="confirmServiceName"></div>
+                        <div class="text-sm text-muted" id="confirmServiceDetails"></div>
+                    </div>
+                    <div style="margin-bottom: var(--spacing-md);">
+                        <div class="text-xs text-muted">Дата и время</div>
+                        <div class="font-bold" id="confirmDateTime"></div>
+                    </div>
+                    <div>
+                        <label for="clientPhone">Твой номер телефона (опционально)</label>
+                        <input type="tel" id="clientPhone" placeholder="+7 (___) ___-__-__">
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="app.submitBooking()">✓ Подтвердить запись</button>
+                <button class="btn btn-secondary btn-block mt-sm" onclick="app.backToTimeSelection()">← Назад</button>
+            </div>
+        </div>
+
+        <!-- Успех -->
+        <div id="successMessage" style="display: none;">
+            <div class="card">
+                <div style="text-align: center; padding: var(--spacing-xl) 0;">
+                    <div style="font-size: 48px; margin-bottom: var(--spacing-md);">✅</div>
+                    <div class="card-title">Запись успешно создана!</div>
+                    <div class="text-muted" style="margin-bottom: var(--spacing-lg);">
+                        Проверь уведомления в Telegram
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="app.reset()">← Вернуться</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ошибка -->
+        <div id="errorMessage" style="display: none;" class="alert alert-danger"></div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
